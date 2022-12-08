@@ -73,8 +73,11 @@ program ecrad_ifs_driver
   !integer :: istartcol, iendcol ! Range of columns to process
 
   ! Name of file names specified on command line
-  character(len=512) :: input_file_name, output_file_name, nml_file_name
+  character(len=512) :: input_file_name, output_file_name, nml_file_name, nblocksize_arg
   integer            :: istatus ! Result of command_argument_count
+
+  !optional nblocksize parameter
+  integer :: nblocksize         !how many blocks to be processed in parallel. can be set through command line or namelist
 
   ! monolithic IFS data structure to pass to radiation scheme
   real(kind=jprb), allocatable :: zrgp(:,:,:)
@@ -118,6 +121,14 @@ program ecrad_ifs_driver
     stop 'Failed to read name of output NetCDF file as string of length < 512'
   end if
 
+  ! Get optional nblocksize value
+  nblocksize = -1 !default value, signifies a value has not been provided over the command line
+  !NOT SURE HOW THIS WILL INTERACT WITH output_surface_file.nc
+  call get_command_argument(4, nblocksize_arg, status=istatus)
+  if (istatus == 0) then
+    read (unit=nblocksize_arg, fmt=*) nblocksize !convert command line arg from string to int
+  end if
+
   ! --------------------------------------------------------
   ! Section 3: Read input data file
   ! --------------------------------------------------------
@@ -125,7 +136,7 @@ program ecrad_ifs_driver
   call ecrad_standalone_setup( &
     & nml_file_name, input_file_name, driver_config, config, &
     & single_level, thermodynamics, gas, cloud, aerosol, &
-    & ncol, nlev )
+    & ncol, nlev, nblocksize )
 
   call ecrad_ifs_setup(nml_file_name, driver_config, config, ydmodel, ncol)
 

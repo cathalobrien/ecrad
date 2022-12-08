@@ -21,7 +21,7 @@ contains
 subroutine ecrad_standalone_setup ( &
   & nml_file_name, input_file_name, driver_config, config, &
   & single_level, thermodynamics, gas, cloud, aerosol, &
-  & ncol, nlev )
+  & ncol, nlev, nblocksize )
 
   use parkind1,                 only : jprb ! Working precision
 
@@ -56,6 +56,8 @@ subroutine ecrad_standalone_setup ( &
   type(aerosol_type), intent(inout)        :: aerosol
 
   integer, intent(out) :: ncol, nlev         ! Number of columns and levels
+
+  integer :: nblocksize               ! Number of cols to process in parallel
 
   ! The NetCDF file containing the input profiles
   type(netcdf_file)         :: file
@@ -128,6 +130,11 @@ subroutine ecrad_standalone_setup ( &
          &  ' to ', driver_config%iendcol, ') is out of the range in the data (1 to ', &
          &  ncol, ')'
     stop 1
+  end if
+
+  ! update nblocksize if it was set over the command line
+  if (nblocksize /= -1) then
+          driver_config%nblocksize = nblocksize
   end if
 
   ! Store inputs

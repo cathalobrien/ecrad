@@ -71,6 +71,7 @@ subroutine ecrad_ifs_setup(nml_file_name, driver_config, config, ydmodel, ncol)
   integer :: ngpblks, nproma
   logical :: lldebug
 
+
   associate( &
     & ydephy=>ydmodel%yrml_phy_ec%yrephy, &
     & yderad=>ydmodel%yrml_phy_rad%yrerad )

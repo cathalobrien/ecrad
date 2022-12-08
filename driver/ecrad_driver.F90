@@ -61,6 +61,8 @@ program ecrad_driver
 
   integer :: ncol, nlev         ! Number of columns and levels
 
+  integer :: nblocksize_arg
+
   ! Name of file names specified on command line
   character(len=512) :: nml_file_name, input_file_name, output_file_name
   integer            :: istatus ! Result of get_command_argument
@@ -93,6 +95,8 @@ program ecrad_driver
     stop 'Failed to read name of output NetCDF file as string of length < 512'
   end if
 
+  nblocksize_arg = -1 !don't update nblocksize from cl, just read it from namelist later
+
   ! --------------------------------------------------------
   ! Section 3: Read input data file
   ! --------------------------------------------------------
@@ -101,7 +105,7 @@ program ecrad_driver
   call ecrad_standalone_setup( &
     & nml_file_name, input_file_name, driver_config, config, &
     & single_level, thermodynamics, gas, cloud, aerosol, &
-    & ncol, nlev )
+    & ncol, nlev, nblocksize_arg) 
 
   ! --------------------------------------------------------
   ! Section 4: Call radiation scheme
