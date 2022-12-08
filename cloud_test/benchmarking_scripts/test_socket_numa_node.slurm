@@ -38,7 +38,7 @@ for thread_count in "${NUM_THREADS[@]}"; do
 					echo "thread_count $thread_count ntasks 1 input_size $input_size nproma $NP code $binary"
 					srun --hint=nomultithread --cpus-per-task=$thread_count \
 						--ntasks=1 env OMP_NUM_THREADS=$thread_count env OMP_PLACES=cores \
-						bin/$binary ../47r1.nam $input output_data/out.nc
+						../bin/$binary 47r1.nam $input output_data/out.nc
 						#bin/$binary config_cpu.nam $input output_data/out.nc
 				done
 			done
