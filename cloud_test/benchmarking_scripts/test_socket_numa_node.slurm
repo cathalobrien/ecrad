@@ -8,8 +8,9 @@
 
 
 #compile step
-#what flags am I using?
-BINS=("ecrad_ifs")
+#list of profiles (compilers + flags) which will be benchmarked
+PROFILE_LIST=("gfortran" "intel" "intel_heap" "intel_opt")
+BINS=("ecrad_ifs") #list of binaries to be tested
 
 cd /ec/res4/hpcperm/naco/moria/ecrad/cloud_test/
 
@@ -20,26 +21,38 @@ CPUS_PER_NODE=128
 NUM_THREADS=($CPUS_PER_NUMA_REGION $CPUS_PER_SOCKET $CPUS_PER_NODE)
 
 #set some runtime parameters
-export OMP_SCHEDULE=dynamic #does this work for ecrad too?
-NPROMA_SIZES=(32) #start off with a single NPROMA size to compare node performance
+export OMP_SCHEDULE=dynamic #does this work for ecrad too?, anyway I'll put it in bc should help with load balancing of day/night cols
+NPROMA_SIZES=(8) #start off with a single NPROMA size to compare node performance
 iterations=3
 base_input_file="ecrad_meridian"
 INPUT_SIZES=("20000" "30000" "40000")
 
 #Only 1 task will be used, bc ecrad does not support mpi
 
+#print a summary of the benchmarking runs
+total_runs=1
+echo "Benchmarking the following profiles: ${PROFILE_LIST[*]}"
+echo "Benchmarking the following binaries: ${BINS[*]}"
+echo "Benchmarking the following number of CPUs: ${NUM_THREADS[*]}"
+echo "Benchmarking the following number of NPROMA values: ${NPROMA_SIZES[*]}"
+echo "Benchmarking the following number of input sizes: ${INPUT_SIZES[*]}"
+total_runs=$(expr $total_runs * ${#PROFILE_LIST[@]} * ${#BINS[@]} * ${#NUM_THREADS[@]} * ${#NPROMA_SIZES[@]} * ${#INPUT_SIZES[@]}  * $iterations)
+echo "Performing each configuration $iterations times, for a total of $total_runs runs"
+
 #launch the runs
-for thread_count in "${NUM_THREADS[@]}"; do
-	for input_size in "${INPUT_SIZES[@]}"; do
-		input="input_data/${base_input_file}_${input_size}.nc"
-		for NP in "${NPROMA_SIZES[@]}"; do
-			for binary in "${BINS[@]}"; do
-				for ((i = 0 ; i < $iterations ; i++)); do
-					echo "thread_count $thread_count ntasks 1 input_size $input_size nproma $NP code $binary"
-					srun --hint=nomultithread --cpus-per-task=$thread_count \
-						--ntasks=1 env OMP_NUM_THREADS=$thread_count env OMP_PLACES=cores \
-						../bin/$binary 47r1.nam $input output_data/out.nc
-						#bin/$binary config_cpu.nam $input output_data/out.nc
+for profile in "${PROFILE_LIST[@]}";do
+        build_dir="build/$profile"
+        for thread_count in "${NUM_THREADS[@]}"; do
+                for input_size in "${INPUT_SIZES[@]}"; do
+                        input="input_data/${base_input_file}_${input_size}.nc"
+                        for NP in "${NPROMA_SIZES[@]}"; do
+                                for binary in "${BINS[@]}"; do
+                                        for ((i = 0 ; i < $iterations ; i++)); do
+                                                echo "thread_count $thread_count input_size $input_size nproma $NP code $binary profile $profile"
+                                                srun --hint=nomultithread --cpus-per-task=$thread_count \
+							--ntasks=1 env OMP_NUM_THREADS=$thread_count env OMP_PLACES=cores \
+                                                        $build_dir/$binary 47r1.nam $input output_data/out.nc
+					done
 				done
 			done
 		done
