@@ -2,36 +2,24 @@
 #SBATCH --job-name=ecrad-numa-socket-node-bm
 #SBATCH --qos=np
 #SBATCH --nodes=1
-#SBATCH --time=0:20:00
+#SBATCH --time=0:2:00
 #SBATCH --output=ecrad.%j.out
 #SBATCH --error=ecrad.%j.out
 
-
-#compile step
-#list of profiles (compilers + flags) which will be benchmarked
-PROFILE_LIST=("gfortran" "intel" "intel_heap" "intel_opt")
-PRGENV_LIST=("gnu" "intel" "intel" "intel") #list dictates which compiler should be used for each profile
-BINS=("ecrad_ifs") #list of binaries to be tested
-
-cd /ec/res4/hpcperm/naco/moria/ecrad/cloud_test/
-
-#define some parameters of the machine you're running on. will have be changed for other processors
-CPUS_PER_NUMA_REGION=16
-CPUS_PER_SOCKET=64
-CPUS_PER_NODE=128
-NUM_THREADS=($CPUS_PER_NUMA_REGION $CPUS_PER_SOCKET $CPUS_PER_NODE)
-
-#set some runtime parameters
 export OMP_SCHEDULE=dynamic #does this work for ecrad too?, anyway I'll put it in bc should help with load balancing of day/night cols
-NPROMA_SIZES=(8) #start off with a single NPROMA size to compare node performance
-iterations=3
-base_input_file="ecrad_meridian"
-INPUT_SIZES=("20000" "30000" "40000")
-namelist="47r1.nam"
 
-#Only 1 task will be used, bc ecrad does not support mpi
+#this file contains many variables which define the paramters of this benchmarking run
+if [ -z "$1" ]; then #check if config file has been given, if not do a toy run
+	echo "usage: sbatch benchmark_ecrad.slurm [bm_config.env]"
+	echo "no config provided so doing a simple demo run (see .demo.env)"
+	source .demo.env
+else #load the provided config file
+	source $1
+fi
 
-#print a summary of the benchmarking runs
+cd /ec/res4/hpcperm/naco/moria/ecrad/cloud_test/ #just makes the addressing slightly shorter
+
+#print a summary of this benchmarking session
 echo "Benchmarking the following profiles: ${PROFILE_LIST[*]}"
 echo "Benchmarking the following binaries: ${BINS[*]}"
 echo "Benchmarking the following number of CPUs: ${NUM_THREADS[*]}"
