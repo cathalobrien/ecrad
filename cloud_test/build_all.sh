@@ -10,7 +10,7 @@ len=${#PROFILE_LIST[@]}
 for ((i = 0 ; i < $len ; i++)); do
 	profile=${PROFILE_LIST[$i]}
 	prgenv="prgenv/${PRGENV_LIST[$i]}"
-	echo "\n\n\nBuilding profile $profile with $prgenv\n\n\n"
+	printf "\n\n\nBuilding profile $profile with $prgenv\n\n\n"
 
 	#load required modules
 	module load $prgenv netcdf4

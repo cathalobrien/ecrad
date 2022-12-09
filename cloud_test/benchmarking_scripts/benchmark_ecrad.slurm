@@ -2,13 +2,14 @@
 #SBATCH --job-name=ecrad-numa-socket-node-bm
 #SBATCH --qos=np
 #SBATCH --nodes=1
-#SBATCH --time=0:2:00
+#SBATCH --time=0:20:00
 #SBATCH --output=ecrad.%j.out
 #SBATCH --error=ecrad.%j.out
 
-export OMP_SCHEDULE=dynamic #does this work for ecrad too?, anyway I'll put it in bc should help with load balancing of day/night cols
+export OMP_SCHEDULE=dynamic #Should give a good distribution of day/night cols to all cores, ensuring a relatively even decomposition of work
 
-#this file contains many variables which define the paramters of this benchmarking run
+#read a command line arg which defines the benchmarking session
+
 if [ -z "$1" ]; then #check if config file has been given, if not do a toy run
 	echo "usage: sbatch benchmark_ecrad.slurm [bm_config.env]"
 	echo "no config provided so doing a simple demo run (see .demo.env)"
