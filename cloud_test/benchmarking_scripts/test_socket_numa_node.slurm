@@ -10,6 +10,7 @@
 #compile step
 #list of profiles (compilers + flags) which will be benchmarked
 PROFILE_LIST=("gfortran" "intel" "intel_heap" "intel_opt")
+PRGENV_LIST=("gnu" "intel" "intel" "intel") #list dictates which compiler should be used for each profile
 BINS=("ecrad_ifs") #list of binaries to be tested
 
 cd /ec/res4/hpcperm/naco/moria/ecrad/cloud_test/
@@ -26,21 +27,25 @@ NPROMA_SIZES=(8) #start off with a single NPROMA size to compare node performanc
 iterations=3
 base_input_file="ecrad_meridian"
 INPUT_SIZES=("20000" "30000" "40000")
+namelist="47r1.nam"
 
 #Only 1 task will be used, bc ecrad does not support mpi
 
 #print a summary of the benchmarking runs
-total_runs=1
 echo "Benchmarking the following profiles: ${PROFILE_LIST[*]}"
 echo "Benchmarking the following binaries: ${BINS[*]}"
 echo "Benchmarking the following number of CPUs: ${NUM_THREADS[*]}"
 echo "Benchmarking the following number of NPROMA values: ${NPROMA_SIZES[*]}"
 echo "Benchmarking the following number of input sizes: ${INPUT_SIZES[*]}"
-total_runs=$(expr $total_runs * ${#PROFILE_LIST[@]} * ${#BINS[@]} * ${#NUM_THREADS[@]} * ${#NPROMA_SIZES[@]} * ${#INPUT_SIZES[@]}  * $iterations)
+total_runs=$((${#PROFILE_LIST[@]} * ${#BINS[@]} * ${#NUM_THREADS[@]} * ${#NPROMA_SIZES[@]} * ${#INPUT_SIZES[@]}  * $iterations))
 echo "Performing each configuration $iterations times, for a total of $total_runs runs"
 
 #launch the runs
-for profile in "${PROFILE_LIST[@]}";do
+for ((profile_id = 0 ; profile_id < ${#PROFILE_LIST[@]} ; profile_id++)); do
+	#load the right modules and select the correct build directory for the current profile
+	profile=${PROFILE_LIST[$profile_id]}
+	prgenv="prgenv/${PRGENV_LIST[$profile_id]}"
+	module load $prgenv netcdf4
         build_dir="build/$profile"
         for thread_count in "${NUM_THREADS[@]}"; do
                 for input_size in "${INPUT_SIZES[@]}"; do
@@ -51,7 +56,7 @@ for profile in "${PROFILE_LIST[@]}";do
                                                 echo "thread_count $thread_count input_size $input_size nproma $NP code $binary profile $profile"
                                                 srun --hint=nomultithread --cpus-per-task=$thread_count \
 							--ntasks=1 env OMP_NUM_THREADS=$thread_count env OMP_PLACES=cores \
-                                                        $build_dir/$binary 47r1.nam $input output_data/out.nc
+                                                        $build_dir/$binary $namelist $input output_data/out.nc
 					done
 				done
 			done
