@@ -9,7 +9,7 @@
 
 #compile step
 #what flags am I using?
-BINS=("ecrad" "ecrad_ifs")
+BINS=("ecrad_ifs")
 
 cd /ec/res4/hpcperm/naco/moria/ecrad/cloud_test/
 
