@@ -2,6 +2,7 @@
 #script which takes a list of profiles (different flag + module configurations) and builds each one
 #binaries are stored in a directory tree at . whith each subdirectory containing the name of its profile
 
+#this script should be called from ecrad/cloud_test
 cd .. #move into the above directory for the makefile (I should probably change this to absolute referencing as opposed to relative)
 
 PROFILE_LIST=("gfortran" "intel" "intel_heap" "intel_opt")
@@ -17,7 +18,7 @@ for ((i = 0 ; i < $len ; i++)); do
 
 	#build the requested profile
 	make clean
-	make PROFILE=${profile}
+	make PROFILE=$profile
 
 	#move binaries to profile subdirectory
 	mkdir -p cloud_test/build/${profile}

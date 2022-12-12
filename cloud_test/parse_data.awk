@@ -1,7 +1,7 @@
 BEGIN 	{ 
 	OFS=",";
 	ORS=""
-	print "Thread_count, input_size, nproma, program, profile, ecrad_runtime, ecrad_ifs_runtime"
+	print "thread_count,input_size,nproma,program,profile,ecrad_runtime,ecrad_ifs_runtime"
 	}
 $1 ~ /^thread_count/ {
 	thread_count = $2;
