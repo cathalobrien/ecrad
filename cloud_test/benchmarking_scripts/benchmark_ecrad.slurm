@@ -1,5 +1,5 @@
 #! /bin/bash
-#SBATCH --job-name=ecrad-numa-socket-node-bm
+#SBATCH --job-name=ecrad-bm
 #SBATCH --qos=np
 #SBATCH --nodes=1
 #SBATCH --time=0:20:00
@@ -45,7 +45,7 @@ for ((profile_id = 0 ; profile_id < ${#PROFILE_LIST[@]} ; profile_id++)); do
                                                 echo "thread_count $thread_count input_size $input_size nproma $NP code $binary profile $profile"
                                                 srun --hint=nomultithread --cpus-per-task=$thread_count \
 							--ntasks=1 env OMP_NUM_THREADS=$thread_count env OMP_PLACES=cores \
-                                                        $build_dir/$binary $namelist $input output_data/out.nc
+                                                        $build_dir/$binary $namelist $input output_data/out.nc $NP
 					done
 				done
 			done
