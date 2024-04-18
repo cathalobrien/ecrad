@@ -238,7 +238,7 @@ SUBROUTINE UNIFORM_DISTRIBUTION (PX,YD_STREAM)
   !--------------------------------------------------------------------------------
   ! Generate uniformly distributed random numbers in the range 0.0<= px < 1.0
   !--------------------------------------------------------------------------------
-  INTEGER(KIND=JPIM), PARAMETER :: IVAR=Z"3FFFFFFF"
+  INTEGER(KIND=JPIM), PARAMETER :: IVAR=INT(Z"3FFFFFFF")
   TYPE(RANDOMNUMBERSTREAM), INTENT(INOUT) :: YD_STREAM
   REAL(KIND=JPRB), DIMENSION(:),     INTENT(  OUT) :: PX
 
